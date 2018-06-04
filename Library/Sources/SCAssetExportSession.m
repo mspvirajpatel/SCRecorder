@@ -540,7 +540,10 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
 
         UIGraphicsEndImageContext();
 
-        CIImage *watermarkCIImage = [CIImage imageWithCGImage:generatedWatermarkImage.CGImage];
+//        CIImage *watermarkCIImage = [CIImage imageWithCGImage:generatedWatermarkImage.CGImage];
+        
+        CIImage *watermarkCIImage = [CIImage imageWithCGImage:watermarkImage.CGImage];
+        
         return [SCFilter filterWithCIImage:watermarkCIImage];
     }
 
