@@ -547,6 +547,100 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
     return nil;
 }
 
+- (void)_setupVideoUsingTracks:(NSArray *)videoTracks {
+    _inputBufferSize = CGSizeZero;
+    if (videoTracks.count > 0 && self.videoConfiguration.enabled && !self.videoConfiguration.shouldIgnore) {
+        AVAssetTrack *videoTrack = [videoTracks objectAtIndex:0];
+        
+        // Input
+        NSDictionary *videoSettings = [_videoConfiguration createAssetWriterOptionsWithVideoSize:videoTrack.naturalSize];
+        
+        // Output
+        AVVideoComposition *videoComposition = self.videoConfiguration.composition;
+        
+        //Apply tranform to video input only when no filer is selected
+        if (!(videoComposition == nil && self.videoConfiguration.filter != nil && self.translatesFilterIntoComposition)) {
+            
+            _videoInput = [self addWriter:AVMediaTypeVideo withSettings:videoSettings];
+            
+            if (_videoConfiguration.keepInputAffineTransform) {
+                _videoInput.transform = videoTrack.preferredTransform;
+            } else {
+                _videoInput.transform = _videoConfiguration.affineTransform;
+            }
+        }else{
+            
+            //If we have a filter selected don't apply the transform but make sure to create the video settings with the right size ie naturalSize + the preffered transform
+            CGSize naturalSizeFirst = videoTrack.naturalSize;
+            
+            CGSize temp = CGSizeApplyAffineTransform(naturalSizeFirst, videoTrack.preferredTransform);
+            CGSize size = CGSizeMake(fabs(temp.width), fabs(temp.height));
+            
+            NSDictionary *videoSettings = [_videoConfiguration createAssetWriterOptionsWithVideoSize:size];
+            _videoInput = [self addWriter:AVMediaTypeVideo withSettings:videoSettings];
+        }
+        
+        
+        if (videoComposition == nil) {
+            _inputBufferSize = videoTrack.naturalSize;
+        } else {
+            _inputBufferSize = videoComposition.renderSize;
+        }
+        
+        CGSize outputBufferSize = _inputBufferSize;
+        if (!CGSizeEqualToSize(self.videoConfiguration.bufferSize, CGSizeZero)) {
+            outputBufferSize = self.videoConfiguration.bufferSize;
+        }
+        
+        _outputBufferSize = outputBufferSize;
+        _outputBufferDiffersFromInput = !CGSizeEqualToSize(_inputBufferSize, outputBufferSize);
+        
+        _filter = [self _generateRenderingFilterForVideoSize:outputBufferSize];
+        
+        if (videoComposition == nil && _filter != nil && self.translatesFilterIntoComposition) {
+            videoComposition = [_filter videoCompositionWithAsset:_inputAsset];
+            if (videoComposition != nil) {
+                _filter = nil;
+            }
+        }
+        
+        NSDictionary *settings = nil;
+        if (_filter != nil || self.videoConfiguration.overlay != nil) {
+            settings = @{
+                         (id)kCVPixelBufferPixelFormatTypeKey     : [NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA],
+                         (id)kCVPixelBufferIOSurfacePropertiesKey : [NSDictionary dictionary]
+                         };
+        } else {
+            settings = @{
+                         (id)kCVPixelBufferPixelFormatTypeKey     : [NSNumber numberWithUnsignedInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange],
+                         (id)kCVPixelBufferIOSurfacePropertiesKey : [NSDictionary dictionary]
+                         };
+        }
+        
+        AVAssetReaderOutput *reader = nil;
+        if (videoComposition == nil) {
+            reader = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:videoTrack outputSettings:settings];
+        } else {
+            AVAssetReaderVideoCompositionOutput *videoCompositionOutput = [AVAssetReaderVideoCompositionOutput assetReaderVideoCompositionOutputWithVideoTracks:videoTracks videoSettings:settings];
+            videoCompositionOutput.videoComposition = videoComposition;
+            reader = videoCompositionOutput;
+        }
+        reader.alwaysCopiesSampleData = NO;
+        
+        if ([_reader canAddOutput:reader]) {
+            [_reader addOutput:reader];
+            _videoOutput = reader;
+        } else {
+            NSLog(@"Unable to add video reader output");
+        }
+        
+        [self _setupPixelBufferAdaptorIfNeeded:_filter != nil || self.videoConfiguration.overlay != nil];
+        [self _setupContextIfNeeded];
+    } else {
+        _videoOutput = nil;
+    }
+}
+
 - (void)_setupAudioUsingTracks:(NSArray *)audioTracks {
     if (audioTracks.count > 0 && self.audioConfiguration.enabled && !self.audioConfiguration.shouldIgnore) {
         // Input
@@ -578,7 +672,7 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
     }
 }
 
-- (void)_setupVideoUsingTracks:(NSArray *)videoTracks {
+/*- (void)_setupVideoUsingTracks:(NSArray *)videoTracks {
     _inputBufferSize = CGSizeZero;
     if (videoTracks.count > 0 && self.videoConfiguration.enabled && !self.videoConfiguration.shouldIgnore) {
         AVAssetTrack *videoTrack = [videoTracks objectAtIndex:0];
@@ -653,7 +747,7 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
     } else {
         _videoOutput = nil;
     }
-}
+}*/
 
 - (void)exportAsynchronouslyWithCompletionHandler:(void (^)())completionHandler {
     _cancelled = NO;
