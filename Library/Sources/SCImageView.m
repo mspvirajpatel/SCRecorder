@@ -50,6 +50,8 @@
 }
 
 - (void)_imageViewCommonInit {
+    self.isMirror = NO;
+    self.orientation = UIImageOrientationUp;
     _scaleAndResizeCIImageAutomatically = YES;
     self.preferredCIImageTransform = CGAffineTransformIdentity;
     
@@ -171,7 +173,8 @@
         CGImageRef imageRef = [context createCGImage:image fromRect:image.extent];
 
         if (imageRef != nil) {
-            returnedImage = [UIImage imageWithCGImage:imageRef];
+            returnedImage = [UIImage imageWithCGImage:imageRef scale:1.0 orientation:UIImageOrientationUpMirrored];
+            
             CGImageRelease(imageRef);
         }
     }
@@ -227,7 +230,11 @@
         horizontalScale = MIN(horizontalScale, verticalScale);
         verticalScale = horizontalScale;
     }
-
+    if (self.isMirror) {
+        image = [image imageByApplyingCGOrientation:kCGImagePropertyOrientationUpMirrored];
+    } else {
+        image = [image imageByApplyingCGOrientation:kCGImagePropertyOrientationUp];
+    }
     return [image imageByApplyingTransform:CGAffineTransformMakeScale(horizontalScale, verticalScale)];
 }
 
@@ -308,6 +315,7 @@
     } else {
         self.preferredCIImageTransform = [SCImageView preferredCIImageTransformFromUIImage:image];
         self.CIImage = [CIImage imageWithCGImage:image.CGImage];
+        
     }
 }
 

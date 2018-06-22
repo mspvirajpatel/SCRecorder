@@ -539,10 +539,13 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
         UIImage *generatedWatermarkImage = UIGraphicsGetImageFromCurrentImageContext();
 
         UIGraphicsEndImageContext();
-
-//        CIImage *watermarkCIImage = [CIImage imageWithCGImage:generatedWatermarkImage.CGImage];
-        
         CIImage *watermarkCIImage = [CIImage imageWithCGImage:watermarkImage.CGImage];
+        if ([[UIScreen mainScreen] bounds].size.width > 375.0) {
+            watermarkCIImage = [CIImage imageWithCGImage:generatedWatermarkImage.CGImage];
+        }
+        
+        
+//        CIImage *watermarkCIImage = [CIImage imageWithCGImage:watermarkImage.CGImage];
         
         return [SCFilter filterWithCIImage:watermarkCIImage];
     }
@@ -577,6 +580,14 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
             CGSize naturalSizeFirst = videoTrack.naturalSize;
             
             CGSize temp = CGSizeApplyAffineTransform(naturalSizeFirst, videoTrack.preferredTransform);
+            
+//            CGAffineTransform transform = CGAffineTransformMakeScale(-1.0, 1.0);
+//            transform = CGAffineTransformTranslate(transform, -[videoTrack naturalSize].width, 0.0);
+//            transform = CGAffineTransformRotate(transform, M_PI_2);
+//            transform = CGAffineTransformTranslate(transform, 0.0, -[videoTrack naturalSize].width);
+//
+//            _videoInput.transform = transform;
+            
             CGSize size = CGSizeMake(fabs(temp.width), fabs(temp.height));
             
             NSDictionary *videoSettings = [_videoConfiguration createAssetWriterOptionsWithVideoSize:size];

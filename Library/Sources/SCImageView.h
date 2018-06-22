@@ -19,6 +19,10 @@
  */
 @interface SCImageView : UIView
 
+@property (assign, nonatomic) UIImageOrientation orientation;
+
+@property (assign, nonatomic) BOOL isMirror;
+
 /**
  The context type to use when loading the context.
  */
