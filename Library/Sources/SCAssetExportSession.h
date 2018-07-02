@@ -13,6 +13,15 @@
 #import "SCAudioConfiguration.h"
 #import "SCContext.h"
 
+typedef enum : NSUInteger {
+    StoryExportTypeOuttakes,
+    StoryExportTypeNotes,
+    StoryExportTypeStory,
+    StoryExportTypeFeed,
+    StoryExportTypeChat,
+    StoryExportTypeTrash
+} StoryExportType;
+
 @class SCAssetExportSession;
 @protocol SCAssetExportSessionDelegate <NSObject>
 
@@ -27,6 +36,8 @@
 @end
 
 @interface SCAssetExportSession : NSObject
+
+@property (assign, nonatomic) StoryExportType storyExportType;
 
 /**
  The input asset to use

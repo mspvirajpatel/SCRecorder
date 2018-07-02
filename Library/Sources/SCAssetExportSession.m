@@ -508,41 +508,52 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
     return renderingFilter;
 }
 
+- (UIImage *)imageResize :(UIImage*)img andResizeTo:(CGSize)newSize {
+    CGFloat scale = [[UIScreen mainScreen] scale];
+    /*You can remove the below comment if you dont want to scale the image in retina   device .Dont forget to comment UIGraphicsBeginImageContextWithOptions*/
+    //UIGraphicsBeginImageContext(newSize);
+    UIGraphicsBeginImageContextWithOptions(newSize, NO, scale);
+    [img drawInRect:CGRectMake(0,0,newSize.width,newSize.height)];
+    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+}
 
 - (SCFilter *)_buildWatermarkFilterForVideoSize:(CGSize)videoSize {
     UIImage *watermarkImage = self.videoConfiguration.watermarkImage;
-
+    NSLog(@"width = %f, height = %f", videoSize.width, videoSize.height);
+    watermarkImage = [self imageResize:watermarkImage andResizeTo: CGSizeMake(videoSize.height, videoSize.width)];
     if (watermarkImage != nil) {
         CGRect watermarkFrame = self.videoConfiguration.watermarkFrame;
 
         switch (self.videoConfiguration.watermarkAnchorLocation) {
             case SCWatermarkAnchorLocationTopLeft:
-
+                
                 break;
             case SCWatermarkAnchorLocationTopRight:
-                watermarkFrame.origin.x = videoSize.width - watermarkFrame.size.width - watermarkFrame.origin.x;
+//                watermarkFrame.origin.x = videoSize.width - watermarkFrame.size.width - watermarkFrame.origin.x;
                 break;
             case SCWatermarkAnchorLocationBottomLeft:
-                watermarkFrame.origin.y = videoSize.height - watermarkFrame.size.height - watermarkFrame.origin.y;
+//                watermarkFrame.origin.y = videoSize.height - watermarkFrame.size.height - watermarkFrame.origin.y;
 
                 break;
             case SCWatermarkAnchorLocationBottomRight:
-                watermarkFrame.origin.y = videoSize.height - watermarkFrame.size.height - watermarkFrame.origin.y;
-                watermarkFrame.origin.x = videoSize.width - watermarkFrame.size.width - watermarkFrame.origin.x;
+//                watermarkFrame.origin.y = videoSize.height - watermarkFrame.size.height - watermarkFrame.origin.y;
+//                watermarkFrame.origin.x = videoSize.width - watermarkFrame.size.width - watermarkFrame.origin.x;
                 break;
         }
 
-        UIGraphicsBeginImageContextWithOptions(videoSize, NO, 1);
+        UIGraphicsBeginImageContextWithOptions(CGSizeMake(videoSize.height, videoSize.width), NO, 1);
 
         [watermarkImage drawInRect:watermarkFrame];
 
         UIImage *generatedWatermarkImage = UIGraphicsGetImageFromCurrentImageContext();
 
         UIGraphicsEndImageContext();
-        CIImage *watermarkCIImage = [CIImage imageWithCGImage:watermarkImage.CGImage];
-        if ([[UIScreen mainScreen] bounds].size.width > 375.0) {
-            watermarkCIImage = [CIImage imageWithCGImage:generatedWatermarkImage.CGImage];
-        }
+//        CIImage *watermarkCIImage = [CIImage imageWithCGImage:watermarkImage.CGImage];
+//        if ([[UIScreen mainScreen] bounds].size.width > 375.0) {
+            CIImage *watermarkCIImage = [CIImage imageWithCGImage:generatedWatermarkImage.CGImage];
+//        }
         
         
 //        CIImage *watermarkCIImage = [CIImage imageWithCGImage:watermarkImage.CGImage];
