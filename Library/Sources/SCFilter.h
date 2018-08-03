@@ -49,6 +49,9 @@
  */
 @property (strong, nonatomic) NSString *__nullable name;
 
+
+@property (strong, nonatomic) NSString *__nullable fileName;
+
 /**
  Whether this filter should process the images from imageByProcessingImage:.
  */

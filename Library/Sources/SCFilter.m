@@ -405,7 +405,9 @@
     NSData *data = [NSData dataWithContentsOfURL:url];
     
     if (data != nil) {
-        return [SCFilter filterWithData:data];
+        SCFilter *filter = [SCFilter filterWithData:data];
+        filter.fileName = [[url lastPathComponent] stringByDeletingPathExtension];
+        return filter;
     }
     
     return nil;
