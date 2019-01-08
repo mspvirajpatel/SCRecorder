@@ -417,6 +417,10 @@ static char* LoadedTimeRanges = "LoadedTimeRanges";
     _autoRotate = autoRotate;
 }
 
+-(AVPlayerItemVideoOutput *)itemVideoOutput {
+    return _videoOutput;
+}
+
 + (SCPlayer*)player {
     return [SCPlayer new];
 }

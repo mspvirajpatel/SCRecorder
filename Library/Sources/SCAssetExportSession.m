@@ -521,7 +521,7 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
 
 - (SCFilter *)_buildWatermarkFilterForVideoSize:(CGSize)videoSize {
     UIImage *watermarkImage = self.videoConfiguration.watermarkImage;
-    NSLog(@"width = %f, height = %f", videoSize.width, videoSize.height);
+    NSLog(@"width = %f, height = %f", self.videoConfiguration.watermarkFrame.size.height*375/667, self.videoConfiguration.watermarkFrame.size.height);
     watermarkImage = [self imageResize:watermarkImage andResizeTo: CGSizeMake(videoSize.height, videoSize.width)];
     if (watermarkImage != nil) {
         CGRect watermarkFrame = self.videoConfiguration.watermarkFrame;
@@ -543,7 +543,7 @@ static CGContextRef SCCreateContextFromPixelBuffer(CVPixelBufferRef pixelBuffer)
                 break;
         }
 
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(videoSize.height, videoSize.width), NO, 1);
+        UIGraphicsBeginImageContextWithOptions(CGSizeMake(self.videoConfiguration.watermarkFrame.size.width, self.videoConfiguration.watermarkFrame.size.height), NO, 1);
 
         [watermarkImage drawInRect:watermarkFrame];
 

@@ -107,6 +107,9 @@
  */
 @property (assign, nonatomic) BOOL autoRotate;
 
+
+@property (readonly, nonatomic) AVPlayerItemVideoOutput* itemVideoOutput;
+
 /**
  The renderer for the CIImage. If this property is set, the player will set the CIImage
  property when the current frame changes.
