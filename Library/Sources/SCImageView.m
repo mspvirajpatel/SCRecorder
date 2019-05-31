@@ -356,8 +356,8 @@ static CGRect CGRectMultiply(CGRect rect, CGFloat contentScale) {
         CIImage *image = [self renderedCIImageInRect:rect];
 
         if (image != nil) {
-//            [_context.CIContext drawImage:image inRect:rect fromRect:image.extent];
-            [_context.CIContext drawImage:image inRect:[self processRect:rect withImageSize:image.extent.size] fromRect:image.extent];
+            [_context.CIContext drawImage:image inRect:rect fromRect:image.extent];
+//            [_context.CIContext drawImage:image inRect:[self processRect:rect withImageSize:image.extent.size] fromRect:image.extent];
         }
     }
 }
