@@ -86,6 +86,10 @@ static CGSize MakeVideoSize(CGSize videoSize, float requestedWidth) {
 //    [compressionSettings setObject:AVVideoH264EntropyModeCABAC forKey:AVVideoH264EntropyModeKey];
     [compressionSettings setObject:@30 forKey:AVVideoExpectedSourceFrameRateKey];
     
+    if (outputSize.width > outputSize.height) {
+        outputSize = CGSizeMake(outputSize.height, outputSize.width);
+    }
+    
     return @{
              AVVideoCodecKey : self.codec,
              AVVideoScalingModeKey : self.scalingMode,
