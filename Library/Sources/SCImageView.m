@@ -24,6 +24,7 @@
 @property (nonatomic, strong) GLKView *GLKView;
 @property (nonatomic, strong) id<MTLCommandQueue> MTLCommandQueue;
 @property (nonatomic, strong) SCSampleBufferHolder *sampleBufferHolder;
+@property (nonatomic) BOOL isImage;
 
 @end
 
@@ -313,6 +314,7 @@
     if (image == nil) {
         self.CIImage = nil;
     } else {
+        self.isImage = YES;
         self.preferredCIImageTransform = [SCImageView preferredCIImageTransformFromUIImage:image];
         self.CIImage = [CIImage imageWithCGImage:image.CGImage];
         
@@ -356,8 +358,11 @@ static CGRect CGRectMultiply(CGRect rect, CGFloat contentScale) {
         CIImage *image = [self renderedCIImageInRect:rect];
 
         if (image != nil) {
-            [_context.CIContext drawImage:image inRect:rect fromRect:image.extent];
-//            [_context.CIContext drawImage:image inRect:[self processRect:rect withImageSize:image.extent.size] fromRect:image.extent];
+            if (self.isImage) {
+                [_context.CIContext drawImage:image inRect:[self processRect:rect withImageSize:image.extent.size] fromRect:image.extent];
+            } else {
+                [_context.CIContext drawImage:image inRect:rect fromRect:image.extent];
+            }
         }
     }
 }
