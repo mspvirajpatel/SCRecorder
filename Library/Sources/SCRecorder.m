@@ -435,9 +435,9 @@ static char* SCRecorderPhotoOptionsContext = "PhotoOptionsContext";
         id<SCRecorderDelegate> delegate = self.delegate;
         
         if (recordSession != nil) {
-            if ([delegate respondsToSelector:@selector(recorder:didAppendVideoSampleBufferInSession:)]) {
+            if ([delegate respondsToSelector:@selector(recorder:didAppendVideoSampleBufferInSession:videoSampleBuffer:)]) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [delegate recorder:self didAppendVideoSampleBufferInSession:recordSession];
+                    [delegate recorder:self didAppendVideoSampleBufferInSession:recordSession videoSampleBuffer:recordSession.createPixelBuffer];
                 });
             }
             if ([delegate respondsToSelector:@selector(recorder:didAppendAudioSampleBufferInSession:)]) {
@@ -455,7 +455,7 @@ static char* SCRecorderPhotoOptionsContext = "PhotoOptionsContext";
     void (^block)() = ^{
         _isRecording = YES;
         if (_movieOutput != nil && _session != nil) {
-            _movieOutput.maxRecordedDuration = self.maxRecordDuration;
+//            _movieOutput.maxRecordedDuration = self.maxRecordDuration;
             [self beginRecordSegmentIfNeeded:_session];
             if (_movieOutputProgressTimer == nil) {
                 _movieOutputProgressTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / 60.0 target:self selector:@selector(_progressTimerFired:) userInfo:nil repeats:YES];
@@ -736,9 +736,9 @@ static char* SCRecorderPhotoOptionsContext = "PhotoOptionsContext";
                 [self appendVideoSampleBuffer:sampleBuffer toRecordSession:recordSession duration:duration connection:connection completion:^(BOOL success) {
                     _lastAppendedVideoTime = CACurrentMediaTime();
                     if (success) {
-                        if ([delegate respondsToSelector:@selector(recorder:didAppendVideoSampleBufferInSession:)]) {
+                        if ([delegate respondsToSelector:@selector(recorder:didAppendVideoSampleBufferInSession:videoSampleBuffer:)]) {
                             dispatch_async(dispatch_get_main_queue(), ^{
-                                [delegate recorder:self didAppendVideoSampleBufferInSession:recordSession];
+                                [delegate recorder:self didAppendVideoSampleBufferInSession:recordSession videoSampleBuffer:sampleBuffer];
                             });
                         }
 

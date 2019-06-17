@@ -97,7 +97,7 @@ typedef NS_ENUM(NSInteger, SCFlashMode) {
 /**
  Called when the recorder has appended a video buffer in a session
  */
-- (void)recorder:(SCRecorder *__nonnull)recorder didAppendVideoSampleBufferInSession:(SCRecordSession *__nonnull)session;
+- (void)recorder:(SCRecorder *__nonnull)recorder didAppendVideoSampleBufferInSession:(SCRecordSession *__nonnull)session videoSampleBuffer:(CMSampleBufferRef *__nonnull)sampleBuffer;
 
 /**
  Called when the recorder has appended an audio buffer in a session
